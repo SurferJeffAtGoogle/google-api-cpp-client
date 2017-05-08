@@ -949,7 +949,8 @@ class GLogPackageInstaller(PackageInstaller):
       config: (ConfigInfo) Configuration information.
       url: (string)  The URL to download from.
     """
-    super(GLogPackageInstaller, self).__init__(config, url)
+    super(GLogPackageInstaller, self).__init__(config, url,
+                                               package_name='glog-0.3.4')
     self._msbuild_args = '/p:Configuration=Release;Platform=x86'
     self._vc_upgrade_from_project_path = (
         '%s\\vsprojects\\libglog\\libglog.vcproj' % self._package_path)
@@ -1084,7 +1085,7 @@ class Installer(object):
         # GLog is the logging mechanism used through the client API
         'glog': (GLogPackageInstaller(
             config,
-            'http://google-glog.googlecode.com/files/glog-0.3.3.tar.gz')),
+            'https://github.com/google/glog/archive/v0.3.4.tar.gz')),
 
         # GMock (and included GTest) are only used for tests, not runtime
         # Only used for tests.
