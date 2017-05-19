@@ -19,6 +19,20 @@ endif()
 target_link_libraries(calendar_sample ${GFLAGS_LIBRARY})
 target_link_libraries(calendar_sample pthread)
 
+add_executable(storage_sample storage_sample_main.cc)
+target_link_libraries(storage_sample google_calendar_api)
+target_link_libraries(storage_sample google_storage_api)
+target_link_libraries(storage_sample googleapis_jsoncpp)
+target_link_libraries(storage_sample googleapis_curl_http)
+target_link_libraries(storage_sample googleapis_http)
+target_link_libraries(storage_sample googleapis_oauth2)
+target_link_libraries(storage_sample googleapis_utils)
+if (HAVE_OPENSSL)
+target_link_libraries(storage_sample googleapis_openssl_codec)
+endif()
+target_link_libraries(storage_sample ${GFLAGS_LIBRARY})
+target_link_libraries(storage_sample pthread)
+
 
 # A helper library used by other samples
 # It provides a shell command processor for sending messages interactively.
