@@ -83,16 +83,16 @@ void JwtBuilder::AppendAsBase64(const char* cdata, size_t size, string* to) {
   }
   if (last_group_size == 2) {
     // Pack 2 octets into group.
-    size_t group = data[i] << 8 | data[i + 1];
+    size_t group = data[i] << 16 | data[i + 1] << 8;
     // Unpack 3 sextets from the group.
-    for (int shift = 12; shift >= 0; shift -= 6) {
+    for (int shift = 18; shift >= 6; shift -= 6) {
       to->push_back(map[(group >> shift) & 0x3f]);
     }
   } else if (last_group_size == 1) {
     // Pack 1 octet into group.
-    size_t group = data[i];
+    size_t group = data[i] << 16;
     // Unpack 2 sextets from the group.
-    for (int shift = 6; shift >= 0; shift -= 6) {
+    for (int shift = 18; shift >= 12; shift -= 6) {
       to->push_back(map[(group >> shift) & 0x3f]);
     }
   }
