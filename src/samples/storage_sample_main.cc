@@ -278,6 +278,7 @@ class CalendarSample {
 
 // static
 std::unique_ptr<CalendarService> CalendarSample::service_;
+std::unique_ptr<StorageService> CalendarSample::storage_;
 std::unique_ptr<OAuth2AuthorizationFlow> CalendarSample::flow_;
 std::unique_ptr<HttpTransportLayerConfig> CalendarSample::config_;
 
