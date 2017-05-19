@@ -64,11 +64,38 @@ util::Status JwtBuilder::LoadPrivateKeyFromPkcs12Path(
   return status;
 }
 
-void JwtBuilder::AppendAsBase64(const char* data, size_t size, string* to) {
-  string encoded;
-  strings::WebSafeBase64Escape(
-      reinterpret_cast<const unsigned char*>(data), size, &encoded, false);
-  to->append(encoded);
+void JwtBuilder::AppendAsBase64(const char* cdata, size_t size, string* to) {
+  // RFC 4648 section 5
+  static const char map[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const unsigned char* const data =
+      reinterpret_cast<const unsigned char*>(cdata);
+  size_t const last_group_size = size % 3;
+  size_t const end = size - last_group_size;
+  size_t i = 0;
+  for (i = 0; i < end; i += 3) {
+    // Pack 3 octets into group.
+    size_t group = data[i] << 16 | data[i + 1] << 8 | data[i + 2];
+    // Unpack 4 sextets from the group.
+    for (int shift = 18; shift >= 0; shift -= 6) {
+      to->push_back(map[(group >> shift) & 0x3f]);
+    }
+  }
+  if (last_group_size == 2) {
+    // Pack 2 octets into group.
+    size_t group = data[i] << 8 | data[i + 1];
+    // Unpack 3 sextets from the group.
+    for (int shift = 12; shift >= 0; shift -= 6) {
+      to->push_back(map[(group >> shift) & 0x3f]);
+    }
+  } else if (last_group_size == 1) {
+    // Pack 1 octet into group.
+    size_t group = data[i];
+    // Unpack 2 sextets from the group.
+    for (int shift = 6; shift >= 0; shift -= 6) {
+      to->push_back(map[(group >> shift) & 0x3f]);
+    }
+  }
 }
 
 void JwtBuilder::AppendAsBase64(const string& from, string* to) {
