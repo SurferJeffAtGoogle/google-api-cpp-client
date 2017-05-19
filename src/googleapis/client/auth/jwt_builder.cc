@@ -16,16 +16,17 @@
  *
  * @}
  */
+#include <glog/logging.h>
+#include <memory>
 #include <string>
+
 using std::string;
 #include "googleapis/client/auth/jwt_builder.h"
 #include "googleapis/client/util/status.h"
-#include "googleapis/strings/escaping.h"
 #include "googleapis/strings/strcat.h"
 
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
-#include <openssl/digest.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
@@ -127,23 +128,22 @@ util::Status JwtBuilder::MakeJwtUsingEvp(
   AppendAsBase64(claims, &data_to_sign);
 
   googleapis::util::Status status;
-  EVP_MD_CTX ctx;
-  EVP_SignInit(&ctx, EVP_sha256());
-  EVP_SignUpdate(&ctx, data_to_sign.c_str(), data_to_sign.size());
+  std::unique_ptr<EVP_MD_CTX, void(*)(EVP_MD_CTX*)>
+                  ctx(EVP_MD_CTX_new(), &EVP_MD_CTX_free);
+  EVP_SignInit(ctx.get(), EVP_sha256());
+  EVP_SignUpdate(ctx.get(), data_to_sign.c_str(), data_to_sign.size());
 
   unsigned int buffer_size = EVP_PKEY_size(pkey);
   std::unique_ptr<char[]> buffer(new char[buffer_size]);
 
   if (EVP_SignFinal(
-          &ctx,
+          ctx.get(),
           reinterpret_cast<unsigned char*>(buffer.get()),
           &buffer_size,
           pkey) == 0) {
     status = StatusInternalError(
         StrCat("Failed signing JWT. error=", ERR_get_error()));
   }
-
-  EVP_MD_CTX_cleanup(&ctx);
 
   if (!status.ok()) return status;
 
