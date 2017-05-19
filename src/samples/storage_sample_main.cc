@@ -58,6 +58,7 @@ using std::ostream;  // NOLINT
 #include <memory>
 #include "googleapis/client/auth/file_credential_store.h"
 #include "googleapis/client/auth/oauth2_authorization.h"
+#include "googleapis/client/auth/oauth2_service_authorization.h"
 #include "googleapis/client/data/data_reader.h"
 #if HAVE_OPENSSL
 #include "googleapis/client/data/openssl_codec.h"
@@ -70,6 +71,7 @@ using std::ostream;  // NOLINT
 #include "googleapis/strings/strcat.h"
 
 #include "google/calendar_api/calendar_api.h"  // NOLINT
+#include "google/storage_api/storage_api.h"  // NOLINT
 
 namespace googleapis {
 
@@ -93,6 +95,8 @@ using google_calendar_api::EventsResource_ListMethod;
 using google_calendar_api::EventsResource_ListMethodPager;
 using google_calendar_api::EventsResource_PatchMethod;
 using google_calendar_api::EventsResource_UpdateMethod;
+
+using google_storage_api::StorageService;
 
 using client::ClientServiceRequest;
 using client::DateTime;
@@ -267,6 +271,7 @@ class CalendarSample {
 
   OAuth2Credential credential_;
   static std::unique_ptr<CalendarService> service_;
+  static std::unique_ptr<StorageService> storage_;
   static std::unique_ptr<OAuth2AuthorizationFlow> flow_;
   static std::unique_ptr<HttpTransportLayerConfig> config_;
 };
@@ -296,39 +301,11 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
     config_->mutable_default_transport_options()->set_cacerts_path(argv[2]);
   }
 
-  // Set up OAuth 2.0 flow for getting credentials to access personal data.
-  const string client_secrets_file = argv[1];
-  flow_.reset(OAuth2AuthorizationFlow::MakeFlowFromClientSecretsPath(
-      client_secrets_file, config_->NewDefaultTransportOrDie(), &status));
-  if (!status.ok()) return status;
-
-  flow_->set_default_scopes(CalendarService::SCOPES::CALENDAR);
-  flow_->mutable_client_spec()->set_redirect_uri(
-      OAuth2AuthorizationFlow::kOutOfBandUrl);
-  flow_->set_authorization_code_callback(
-      NewPermanentCallback(&PromptShellForAuthorizationCode, flow_.get()));
-
-  string home_path;
-  status = FileCredentialStoreFactory::GetSystemHomeDirectoryStorePath(
-      &home_path);
-  if (status.ok()) {
-    FileCredentialStoreFactory store_factory(home_path);
-    // Use a credential store to save the credentials between runs so that
-    // we dont need to get permission again the next time we run. We are
-    // going to encrypt the data in the store, but leave it to the OS to
-    // protect access since we do not authenticate users in this sample.
-#if HAVE_OPENSSL
-    OpenSslCodecFactory* openssl_factory = new OpenSslCodecFactory;
-    status = openssl_factory->SetPassphrase(
-        flow_->client_spec().client_secret());
-    if (!status.ok()) return status;
-    store_factory.set_codec_factory(openssl_factory);
-#endif
-
-    flow_->ResetCredentialStore(
-        store_factory.NewCredentialStore("CalendarSample", &status));
-  }
-  if (!status.ok()) return status;
+  // Set up OAuth 2.0 flow for a service account.
+  flow_.reset(new client::OAuth2ServiceAccountFlow(
+      config_->NewDefaultTransportOrDie()));
+  flow_->InitFromJson(argv[1]);
+  flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   // Now we'll initialize the calendar service proxy that we'll use
   // to interact with the calendar from this sample program.
@@ -336,6 +313,7 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   if (!status.ok()) return status;
 
   service_.reset(new CalendarService(transport));
+  storage_.reset(new StorageService(transport));
   return status;
 }
 
