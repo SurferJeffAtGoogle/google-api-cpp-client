@@ -484,8 +484,20 @@ void CalendarSample::DeleteCalendar(const string& id) {
 
 
 void CalendarSample::Run() {
+  credential_.set_flow(flow_.get());
+  google_storage_api::BucketsResource_ListMethod request(
+      storage_.get(), &credential_, "bookshelf-dotnet");
+  Json::Value value;
+  google_storage_api::Buckets buckets(&value);
+  auto status = request.ExecuteAndParseResponse(&buckets);
+  if (!status.ok()) {
+    std::cout << "Could not list buckets: " << status.error_message()
+              << std::endl;
+  }
+  return;
+
   std::cout << kSampleStepPrefix << "Getting User Authorization" << std::endl;
-  googleapis::util::Status status = Authorize();
+  status = Authorize();
   if (!status.ok()) {
     std::cout << "Could not authorize: " << status.error_message() << std::endl;
     return;
