@@ -118,9 +118,13 @@ string OAuth2AuthorizationFlow::SimpleJsonData::InitFromContainer(
 }
 bool OAuth2AuthorizationFlow::SimpleJsonData::GetString(
     const char* field_name, string* value) const {
-  if (!json_.isMember(field_name)) return false;
-
-  *value = json_[field_name].asString();
+  if (!json_.isObject())
+    return false;
+  Json::Value nullValue;
+  Json::Value result = json_.get(field_name, nullValue);
+  if (!result)
+    return false;
+  *value = result.asString();
   return true;
 }
 bool OAuth2AuthorizationFlow::SimpleJsonData::GetScalar(
@@ -139,6 +143,7 @@ bool OAuth2AuthorizationFlow::SimpleJsonData::GetBool(
 }
 bool OAuth2AuthorizationFlow::SimpleJsonData::GetFirstArrayElement(
     const char* field_name, string* value) const {
+  if (!json_.isArray()) return false;
   if (!json_.isMember(field_name)) return false;
 
   Json::Value array = json_[field_name];
