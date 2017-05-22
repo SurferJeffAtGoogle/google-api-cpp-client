@@ -53,6 +53,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 using std::cout;
 using std::endl;
 using std::ostream;  // NOLINT
@@ -304,11 +305,21 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   }
 
   // Set up OAuth 2.0 flow for a service account.
-  flow_.reset(new client::OAuth2ServiceAccountFlow(
-      config_->NewDefaultTransportOrDie()));
+  auto service_account_flow = new client::OAuth2ServiceAccountFlow(
+      config_->NewDefaultTransportOrDie());
+  flow_.reset(service_account_flow);
   string json(std::istreambuf_iterator<char>(std::ifstream(argv[1]).rdbuf()),
               std::istreambuf_iterator<char>());
   flow_->InitFromJson(json);
+  // Read the private key.
+  Json::Reader reader;
+  Json::Value root;
+  reader.parse(json, root);
+  Json::Value private_key = root["private_key"];
+  if (!private_key.isString()) {
+    return StatusInvalidArgument("Missing private_key.");
+  }
+  service_account_flow->set_private_key(private_key.asString());
   flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   // Now we'll initialize the calendar service proxy that we'll use
