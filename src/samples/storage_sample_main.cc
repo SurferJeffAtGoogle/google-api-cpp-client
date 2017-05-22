@@ -52,6 +52,7 @@
 // of current commands and 'quit' to exit.
 
 #include <iostream>
+#include <fstream>
 using std::cout;
 using std::endl;
 using std::ostream;  // NOLINT
@@ -305,7 +306,9 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   // Set up OAuth 2.0 flow for a service account.
   flow_.reset(new client::OAuth2ServiceAccountFlow(
       config_->NewDefaultTransportOrDie()));
-  flow_->InitFromJson(argv[1]);
+  string json(std::istreambuf_iterator<char>(std::ifstream(argv[1]).rdbuf()),
+              std::istreambuf_iterator<char>());
+  flow_->InitFromJson(json);
   flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   // Now we'll initialize the calendar service proxy that we'll use
