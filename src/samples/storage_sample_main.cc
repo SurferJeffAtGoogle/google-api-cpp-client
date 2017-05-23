@@ -311,15 +311,6 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   string json(std::istreambuf_iterator<char>(std::ifstream(argv[1]).rdbuf()),
               std::istreambuf_iterator<char>());
   flow_->InitFromJson(json);
-  // Read the private key.
-  Json::Reader reader;
-  Json::Value root;
-  reader.parse(json, root);
-  Json::Value private_key = root["private_key"];
-  if (!private_key.isString()) {
-    return StatusInvalidArgument("Missing private_key.");
-  }
-  service_account_flow->set_private_key(private_key.asString());
   flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   // Now we'll initialize the calendar service proxy that we'll use

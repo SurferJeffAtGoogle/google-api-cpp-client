@@ -81,6 +81,8 @@ util::Status OAuth2ServiceAccountFlow::InitFromJsonData(
     return StatusInvalidArgument(StrCat("Missing client_email attribute"));
   }
 
+  GetStringAttribute(data, "private_key", &private_key_);
+
   return StatusOk();
 }
 

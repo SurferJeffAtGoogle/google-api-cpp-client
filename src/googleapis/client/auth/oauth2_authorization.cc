@@ -755,7 +755,6 @@ util::Status OAuth2AuthorizationFlow::InitFromJsonData(
   if (data->GetFirstArrayElement("redirect_uris", &value)) {
     spec->set_redirect_uri(value);
   }
-
   return StatusOk();
 }
 
