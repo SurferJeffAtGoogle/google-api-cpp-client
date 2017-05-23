@@ -728,10 +728,9 @@ OAuth2AuthorizationFlow::MakeFlowFromClientSecretsJson(
 
 util::Status OAuth2AuthorizationFlow::InitFromJson(const string& json) {
   SimpleJsonData data;
-  string root_name = data.InitFromContainer(json);
-  if (root_name.empty()) {
-    return StatusInvalidArgument("Invalid JSON");
-  }
+  util::Status status = data.Init(json);
+  if (!status.ok())
+    return status;
 
   return InitFromJsonData(&data);
 }
