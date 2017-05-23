@@ -312,7 +312,8 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
               std::istreambuf_iterator<char>());
   flow_->InitFromJson(json);
   // Read the private key.
-  service_account_flow->SetPrivateKeyPkcs12Path("/usr/local/google/home/rennie/Downloads/bookshelf-dotnet-74ab9095f57e.p12");
+  status = service_account_flow->SetPrivateKeyPkcs12Path("/usr/local/google/home/rennie/Downloads/bookshelf-dotnet-74ab9095f57e.p12");
+  if (!status.ok()) return status;
   flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   // Now we'll initialize the calendar service proxy that we'll use

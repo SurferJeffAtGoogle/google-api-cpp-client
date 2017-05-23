@@ -109,7 +109,8 @@ util::Status OAuth2ServiceAccountFlow::PerformRefreshToken(
   if (status.ok()) {
     status = credential->Update(request->response()->body_reader());
   } else {
-    VLOG(1) << "Failed to update credential";
+    LOG(ERROR) << "Failed to update credential\n"
+               << request->response()->body_reader()->RemainderToString();
   }
   return status;
 }
