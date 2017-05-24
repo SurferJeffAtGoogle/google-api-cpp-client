@@ -314,13 +314,8 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   flow_->InitFromJson(json);
   flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_FULL_CONTROL);
 
-  // Now we'll initialize the calendar service proxy that we'll use
-  // to interact with the calendar from this sample program.
-  HttpTransport* transport = config_->NewDefaultTransport(&status);
-  if (!status.ok()) return status;
-
-  service_.reset(new CalendarService(transport));
-  storage_.reset(new StorageService(transport));
+  service_.reset(new CalendarService(config_->NewDefaultTransportOrDie()));
+  storage_.reset(new StorageService(config_->NewDefaultTransportOrDie()));
   return status;
 }
 
