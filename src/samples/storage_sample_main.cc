@@ -312,7 +312,7 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
   string json(std::istreambuf_iterator<char>(std::ifstream(argv[1]).rdbuf()),
               std::istreambuf_iterator<char>());
   flow_->InitFromJson(json);
-  flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
+  flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_FULL_CONTROL);
 
   // Now we'll initialize the calendar service proxy that we'll use
   // to interact with the calendar from this sample program.
