@@ -115,13 +115,12 @@ util::Status StorageSample::Startup(int argc, char* argv[]) {
   }
 
   // Set up OAuth 2.0 flow for a service account.
-  auto service_account_flow = new client::OAuth2ServiceAccountFlow(
-      config_->NewDefaultTransportOrDie());
-  flow_.reset(service_account_flow);
+  flow_.reset(new client::OAuth2ServiceAccountFlow(
+      config_->NewDefaultTransportOrDie()));
   string json(std::istreambuf_iterator<char>(std::ifstream(argv[1]).rdbuf()),
               std::istreambuf_iterator<char>());
   flow_->InitFromJson(json);
-  flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_FULL_CONTROL);
+  flow_->set_default_scopes(StorageService::SCOPES::DEVSTORAGE_READ_ONLY);
 
   storage_.reset(new StorageService(config_->NewDefaultTransportOrDie()));
   return status;
