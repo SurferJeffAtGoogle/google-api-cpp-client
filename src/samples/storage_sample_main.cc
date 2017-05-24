@@ -58,6 +58,7 @@ using std::cout;
 using std::endl;
 using std::ostream;  // NOLINT
 #include <memory>
+#include "gflags/gflags.h"
 #include "googleapis/client/auth/file_credential_store.h"
 #include "googleapis/client/auth/oauth2_authorization.h"
 #include "googleapis/client/auth/oauth2_service_authorization.h"
@@ -499,6 +500,9 @@ void CalendarSample::Run() {
     std::cout << "Could not list buckets: " << status.error_message()
               << std::endl;
   }
+  for (auto bucket: buckets.get_items()) {
+    std::cout << bucket.get_self_link() << std::endl;
+  }
   return;
 
   std::cout << kSampleStepPrefix << "Getting User Authorization" << std::endl;
@@ -605,7 +609,8 @@ void CalendarSample::Run() {
 
 using namespace googleapis;
 int main(int argc, char* argv[]) {
-
+  google::InitGoogleLogging(argv[0]);
+  google::ParseCommandLineFlags(&argc, &argv, true);
   googleapis::util::Status status = CalendarSample::Startup(argc, argv);
   if (!status.ok()) {
     std::cerr << "Could not initialize application." << std::endl;
