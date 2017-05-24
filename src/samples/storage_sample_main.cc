@@ -51,12 +51,7 @@
 // program executes a shell that takes commands. Type 'help' for a list
 // of current commands and 'quit' to exit.
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
-using std::cout;
-using std::endl;
-using std::ostream;  // NOLINT
 #include <memory>
 #include "gflags/gflags.h"
 #include "googleapis/client/auth/oauth2_authorization.h"
@@ -76,57 +71,36 @@ using std::ostream;  // NOLINT
 
 namespace googleapis {
 
-using std::cin;
-using std::cout;
-using std::cerr;
-using std::endl;
-
 using google_storage_api::StorageService;
 
-using client::ClientServiceRequest;
-using client::DateTime;
-using client::HttpRequestBatch;
-using client::HttpResponse;
 using client::HttpTransport;
 using client::HttpTransportLayerConfig;
-using client::JsonCppArray;
 using client::OAuth2Credential;
 using client::OAuth2AuthorizationFlow;
-using client::OAuth2RequestOptions;
 #if HAVE_OPENSSL
 using client::OpenSslCodecFactory;
 #endif
-using client::StatusCanceled;
 using client::StatusInvalidArgument;
-using client::StatusOk;
 
-const char kSampleStepPrefix[] = "SAMPLE:  ";
-
-class CalendarSample {
+class StorageSample {
  public:
-  static googleapis::util::Status Startup(int argc, char* argv[]);
+  googleapis::util::Status Startup(int argc, char* argv[]);
   void Run();
 
  private:
 
   OAuth2Credential credential_;
-  static std::unique_ptr<StorageService> storage_;
-  static std::unique_ptr<OAuth2AuthorizationFlow> flow_;
-  static std::unique_ptr<HttpTransportLayerConfig> config_;
+  std::unique_ptr<StorageService> storage_;
+  std::unique_ptr<OAuth2AuthorizationFlow> flow_;
+  std::unique_ptr<HttpTransportLayerConfig> config_;
 };
 
-// static
-std::unique_ptr<StorageService> CalendarSample::storage_;
-std::unique_ptr<OAuth2AuthorizationFlow> CalendarSample::flow_;
-std::unique_ptr<HttpTransportLayerConfig> CalendarSample::config_;
-
-
 /* static */
-util::Status CalendarSample::Startup(int argc, char* argv[]) {
+util::Status StorageSample::Startup(int argc, char* argv[]) {
   if ((argc < 2) || (argc > 3)) {
     string error =
         StrCat("Invalid Usage:\n",
-               argv[0], " <client_secrets_file> [<cacerts_path>]\n");
+               argv[0], " <service_account.json> [<cacerts_path>]\n");
     return StatusInvalidArgument(error);
   }
 
@@ -154,9 +128,7 @@ util::Status CalendarSample::Startup(int argc, char* argv[]) {
 }
 
 
-
-
-void CalendarSample::Run() {
+void StorageSample::Run() {
   credential_.set_flow(flow_.get());
   google_storage_api::BucketsResource_ListMethod request(
       storage_.get(), &credential_, "bookshelf-dotnet");
@@ -178,14 +150,14 @@ using namespace googleapis;
 int main(int argc, char* argv[]) {
   google::InitGoogleLogging(argv[0]);
   google::ParseCommandLineFlags(&argc, &argv, true);
-  googleapis::util::Status status = CalendarSample::Startup(argc, argv);
+  StorageSample sample;
+  googleapis::util::Status status = sample.Startup(argc, argv);
   if (!status.ok()) {
     std::cerr << "Could not initialize application." << std::endl;
     std::cerr << status.error_message() << std::endl;
     return -1;
   }
 
-  CalendarSample sample;
   sample.Run();
   std::cout << "Done!" << std::endl;
 
