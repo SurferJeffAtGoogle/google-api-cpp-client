@@ -17,40 +17,6 @@
  * @}
  */
 
-//
-// This is a sample application illustrating the use of the GoogleApis C++
-// Client. The application makes calls into the Google Calendar service.
-// The application itself is not particularly useful, rather it just
-// illustrates how to interact with a live service.
-//
-// Usage:
-//
-// Calendar requires OAuth2 authorization, which in turn requires that the
-// application be authorized using the https://code.google.com/apis/console.
-// You will need to do this yourself -- creating your own client ID and
-// secret in order to run it.
-//
-// For this example, you want to create an Installed Application
-//    From the "API Access" tab, create an "Installed Application" client ID
-//       Download the client secrets JSON file.
-//    From the "Services" tab, give access to the Calendar API.
-//
-// If you already know the ID and secret, you can create the json file yourself
-// from teh following example (including outer {}). Replace the "..." with
-// your values, but be sure to quote them  (i.e. "mysecret" }
-// {
-//    "installed": {
-//       "client_id": "...",
-//       "client_secret": "..."
-//    }
-//  }
-//
-//
-// When the program starts up you will be asked to authorize by copying
-// a URL into a browser and copying the response back. From there the
-// program executes a shell that takes commands. Type 'help' for a list
-// of current commands and 'quit' to exit.
-
 #include <fstream>
 #include <memory>
 #include "gflags/gflags.h"
@@ -70,6 +36,29 @@
 #include "google/storage_api/storage_api.h"  // NOLINT
 
 namespace googleapis {
+
+static const char usage[] =
+    "This is a sample application illustrating the use of the GoogleApis C++\n"
+    "Client. The application makes calls into the Google Cloud Storage API.\n"
+    "The application itself is not particularly useful, rather it just\n"
+    "illustrates how to interact with a live service.\n"
+    "\n"
+    "Usage:\n"
+    "\tstorage_sample <service_account.json> [<cacerts_path>]\n"
+    "\n"
+    "Output:\n"
+    "\n"
+    "A list of Google Cloud Storage bucket links.\n"
+    "\n"
+    "Example:\n"
+    "\t$ bin/storage_sample your-project-id-1cf578086929.json\n"
+    "\thttps://www.googleapis.com/storage/v1/b/1gallon\n"
+    "\thttps://www.googleapis.com/storage/v1/b/2gallon\n"
+    "\thttps://www.googleapis.com/storage/v1/b/5gallon\n"
+    "\tDone!\n"
+    "\n"
+    "\n"
+    "See README.md for more details.\n";
 
 using google_storage_api::StorageService;
 
@@ -98,10 +87,7 @@ class StorageSample {
 /* static */
 util::Status StorageSample::Startup(int argc, char* argv[]) {
   if ((argc < 2) || (argc > 3)) {
-    string error =
-        StrCat("Invalid Usage:\n",
-               argv[0], " <service_account.json> [<cacerts_path>]\n");
-    return StatusInvalidArgument(error);
+    return StatusInvalidArgument(usage);
   }
 
   // Set up HttpTransportLayer.
