@@ -70,13 +70,13 @@ int main(int argc, char* argv[])
     flow_->set_default_scopes( "https://www.googleapis.com/auth/analytics.readonly" );
 
     // --- GOT ERROR ABOVE
-    //flow_->set_default_scopes( google_analytics_api::AnalyticsService::SCOPES::ANALYTICS_READONLY );
+    flow_->set_default_scopes( google_analytics_api::AnalyticsService::SCOPES::ANALYTICS_READONLY );
 
     // --- GOT ERROR ABOVE
     analytics_.reset(new AnalyticsService(config_->NewDefaultTransportOrDie()));
 
     // --- GOT ERROR ABOVE
-    //AnalyticsService* ga = new AnalyticsService(config_->NewDefaultTransportOrDie());
+    AnalyticsService* ga = new AnalyticsService(config_->NewDefaultTransportOrDie());
 
     if (!status.ok()) printf("status.ok() : ERROR - Could not initialize application.\n");
     else
